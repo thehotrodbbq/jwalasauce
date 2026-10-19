@@ -984,7 +984,7 @@ html.pm-open { overflow: hidden; }
 .pm-k { margin: 0; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #A8A39A; }
 .pm-name { margin: 2px 0 0; font-weight: 700; font-size: 18px; }
 .pm-total { margin: 0; font-family: var(--f-sign, inherit); font-size: 26px; color: #EE5A24; }
-.pm-sub { margin: 18px 0 14px; color: #A8A39A; font-size: 15px; }
+.pm-sub { margin: 18px 0 14px; color: #A8A39A; font-size: 15px; text-align: center; }
 .pm-mount { min-height: 52px; display: grid; place-items: center; }
 .pm-mount form { display: flex; justify-content: center; }
 .pm-load { margin: 0; color: #A8A39A; font-size: 14px; }
@@ -993,6 +993,25 @@ html.pm-open { overflow: hidden; }
 @keyframes pm-up { from { transform: translateY(16px); opacity: 0; } }
 @media (max-width: 700px) { .pm-back { place-items: end center; padding: 0; } .pm-card { width: 100%; border-radius: 12px 12px 0 0; padding: 22px 18px calc(22px + env(safe-area-inset-bottom, 0px)); } }
 @media (prefers-reduced-motion: reduce) { .pm-back, .pm-card { animation: none; } }
+
+/* checkout modal: brand the Razorpay button + safety row */
+.pm-mount form { width: 100%; }
+.pm-mount button, .pm-mount .razorpay-payment-button, .pm-mount .PaymentButton {
+  width: 100% !important; min-height: 54px !important; border-radius: 999px !important; border: 0 !important;
+  background: #EE5A24 !important; background-image: none !important; color: #fff !important; box-shadow: none !important;
+  font: 700 18px/1 var(--f-body, "Hind", sans-serif) !important; cursor: pointer; transition: filter .15s, transform .15s; }
+.pm-mount button:hover, .pm-mount .PaymentButton:hover { filter: brightness(1.08); }
+.pm-mount button:active, .pm-mount .PaymentButton:active { transform: scale(.98); }
+.pm-mount button *, .pm-mount .PaymentButton * { color: #fff !important; background: transparent !important; font-family: inherit !important; }
+.pm-mount .PaymentButton-securedBy, .pm-mount [class*="secured" i] { font-size: 11px !important; opacity: .8; }
+.pm-mount svg path, .pm-mount svg rect { fill: #fff !important; }
+.pm-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin-top: 16px; font-size: 13px; color: #CFC9BA; }
+.pm-trust span { display: inline-flex; align-items: center; gap: 6px; }
+.pm-trust svg { width: 16px; height: 16px; fill: none; stroke: #7BC67E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pm-methods { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 12px; }
+.pm-methods b { font-weight: 600; font-size: 11px; letter-spacing: .5px; color: #A8A39A; border: 1px solid #2E2E2E; border-radius: 4px; padding: 3px 7px; }
+.pm-mount button, .pm-mount .PaymentButton { display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; padding: 8px 24px !important; }
+.pm-mount .PaymentButton-contents { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 </style>
 </head>
 <body>
@@ -1505,6 +1524,12 @@ function payModal(p, btnId, link, total) {
   m.innerHTML = `<div class="pm-card"><button class="pm-x" type="button" aria-label="${T.close}">&times;</button>
     <div class="pm-head"><div class="pm-art">${packArt(p.id)}</div><div><p class="pm-k" id="pm-title">${T.title}</p><p class="pm-name">${p.name}</p><p class="pm-total">${rs(total)}</p></div></div>
     <p class="pm-sub">${T.sub}</p><div class="pm-mount"><p class="pm-load">${T.load}</p></div>
+    <div class="pm-trust">
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>SSL एन्क्रिप्टेड</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>PCI-DSS सुरक्षित</span>
+      <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16v10H4z"/><path d="M4 11h16"/><path d="M8 15h3"/></svg>आपका कार्ड हम कभी नहीं देखते</span>
+    </div>
+    <div class="pm-methods" aria-label="स्वीकृत भुगतान तरीके"><b>UPI</b><b>RuPay</b><b>Visa</b><b>Mastercard</b><b>नेटबैंकिंग</b></div>
     ${link ? `<a class="pm-alt" href="${link}" target="_blank" rel="noopener">${T.alt}</a>` : ""}</div>`;
   document.body.appendChild(m); document.documentElement.classList.add("pm-open");
   const close = () => { m.remove(); document.documentElement.classList.remove("pm-open"); document.removeEventListener("keydown", esc); last && last.focus && last.focus(); };
