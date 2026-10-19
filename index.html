@@ -945,6 +945,18 @@ html[lang="hi"] .age-steps b { font-style: normal; font-stretch: normal; text-tr
 
 /* perf: pause animations in off-screen sections */
 .jw-off, .jw-off * { animation-play-state: paused !important; }
+
+/* mobile footer: no logo, just the BURN OK PLEASE sign */
+@media (max-width:700px){ footer.site .brand img { display:none !important; } footer.site .brand { justify-self:center; align-items:center; width:100%; } footer.site .brand .horn { margin-top:0; font-size:26px; padding:12px 20px; } }
+
+/* order card: product illustration */
+.checkout { grid-template-columns: auto minmax(0,1fr) auto; }
+.sum-art { width: 116px; height: 116px; border-radius: 4px; background: radial-gradient(circle at 50% 60%, #241A14 0, #111 70%); display: grid; place-items: center; overflow: hidden; }
+.sum-art svg { width: 100%; height: 100%; display: block; filter: drop-shadow(0 6px 10px rgba(0,0,0,.5)); }
+.sum-art svg { animation: jw-pop .35s ease-out; }
+@keyframes jw-pop { from { transform: scale(.9) translateY(6px); opacity: .3; } to { transform: none; opacity: 1; } }
+@media (max-width: 760px) { .checkout { grid-template-columns: auto minmax(0,1fr); } .checkout .pay { grid-column: 1 / -1; } .sum-art { width: 92px; height: 92px; } }
+@media (prefers-reduced-motion: reduce) { .sum-art svg { animation: none; } }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1001,7 +1013,7 @@ html[lang="hi"] .age-steps b { font-style: normal; font-stretch: normal; text-tr
   setTimeout(done,t); s.addEventListener('click',done);
 })();
 </script>
-<div class="announce"><div class="wrap" id="announce">Launching <strong>Sunday 1 Nov</strong> · The <strong>Diwali gift box</strong> is here</div></div>
+<div class="announce"><div class="wrap" id="announce">Launching <strong>Sunday 1 Nov</strong> · The <strong>festival gift box</strong> is here</div></div>
 <div class="bunting" aria-hidden="true"></div>
 
 <header class="site"><div class="diwali-lights" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -1203,6 +1215,7 @@ html[lang="hi"] .age-steps b { font-style: normal; font-stretch: normal; text-tr
       <div class="packs" role="radiogroup" aria-label="Pack size" id="packs"></div>
       <noscript><p class="note">1 Bottle ₹249 · 2-Pack ₹469 · Gift Box ₹649 · 6-Pack ₹1,299 (free shipping). Turn on JavaScript to order.</p></noscript>
       <div class="checkout" aria-live="polite">
+        <div class="sum-art" id="sum-art" aria-hidden="true"></div>
         <dl class="sum" id="sum"></dl>
         <div class="pay">
           <a class="btn btn-red" id="pay-btn" href="#shop">Pay with UPI / card</a>
@@ -1368,6 +1381,14 @@ const CONFIG = {
     gift: "",                // Gift Box  ₹649 + ₹79  = ₹728
     six:  ""                 // 6-Pack    ₹1,299, free shipping
   },
+  // Optional: Razorpay Payment Button IDs (start with "pl_"). When set, checkout opens as a popup on this page
+  // instead of a new tab. Razorpay Dashboard > Payment Button > Create > Buy Now. Button IDs are public; never put API keys here.
+  razorpayButtons: {
+    one:  "pl_TplTGRL1N4uGC3",
+    two:  "",
+    gift: "",
+    six:  ""
+  },
   googleAnalyticsId: "",     // e.g. "G-XXXXXXXXXX"
   metaPixelId: "",           // e.g. "123456789012345"
   whatsappNumber: "7760348176",
@@ -1423,9 +1444,41 @@ function waLink(p) {
   return CONFIG.whatsappNumber ? `https://wa.me/91${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}` : "#shop";
 }
 
+function packArt(id) {
+  const B = (x, y, h, r) => { const w = h * 200 / 380; return `<use href="#bottle" x="${x - w / 2}" y="${y - h}" width="${w}" height="${h}"${r ? ` transform="rotate(${r} ${x} ${y})"` : ""}/>`; };
+  let g = "";
+  if (id === "one") g = B(100, 192, 180, 0);
+  else if (id === "two") g = B(78, 190, 160, -7) + B(124, 194, 170, 6);
+  else if (id === "six") g = B(48, 140, 104, 0) + B(100, 140, 104, 0) + B(152, 140, 104, 0) + B(48, 196, 104, 0) + B(100, 196, 104, 0) + B(152, 196, 104, 0);
+  else g = B(62, 128, 104, -4) + B(100, 120, 104, 0) + B(138, 128, 104, 4) +
+    `<rect x="18" y="104" width="164" height="90" rx="4" fill="#111" stroke="#3A3A3A" stroke-width="2"/>` +
+    `<rect x="90" y="104" width="20" height="90" fill="#EE5A24"/><rect x="18" y="140" width="164" height="16" fill="#EE5A24"/>` +
+    `<path d="M100 104 q-26 -22 -30 -2 q2 10 30 2z M100 104 q26 -22 30 -2 q-2 10 -30 2z" fill="#EE5A24" stroke="#111" stroke-width="2"/>`;
+  return `<svg viewBox="0 0 200 200" aria-hidden="true">${g}</svg>`;
+}
+
+function openRzpButton(id, fallback) {
+  let host = document.getElementById("rzp-host");
+  if (!host) { host = document.createElement("div"); host.id = "rzp-host"; host.setAttribute("aria-hidden", "true");
+    host.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);left:-9999px"; document.body.appendChild(host); }
+  if (host.dataset.id !== id) {
+    host.innerHTML = ""; const f = document.createElement("form"); const s = document.createElement("script");
+    s.src = "https://checkout.razorpay.com/v1/payment-button.js"; s.async = true; s.setAttribute("data-payment_button_id", id);
+    f.appendChild(s); host.appendChild(f); host.dataset.id = id;
+  }
+  const t0 = Date.now();
+  (function tryOpen() {
+    const b = host.querySelector(".razorpay-payment-button, button, input[type=submit]");
+    if (b) { b.click(); return; }
+    if (Date.now() - t0 > 6000) { if (fallback) location.href = fallback; return; }
+    setTimeout(tryOpen, 120);
+  })();
+}
+
 function renderSummary() {
   const p = PACKS.find(x => x.id === picked);
   const ship = p.freeShip ? 0 : CONFIG.shipping;
+  const art = document.getElementById("sum-art"); if (art && art.dataset.pack !== p.id) { art.innerHTML = packArt(p.id); art.dataset.pack = p.id; }
   document.getElementById("sum").innerHTML =
     `<dt>${p.name}</dt><dd>${rs(p.price)}</dd>` +
     `<dt>Shipping</dt><dd>${ship ? rs(ship) : "Free"}</dd>` +
@@ -1434,7 +1487,9 @@ function renderSummary() {
   const pay = document.getElementById("pay-btn");
   const note = document.getElementById("pay-note");
   const link = CONFIG.razorpayLinks[p.id];
-  if (link) { pay.href = link; pay.target = "_blank"; pay.rel = "noopener"; pay.onclick = () => track("InitiateCheckout", p); note.removeAttribute("data-warn"); note.textContent = "You'll pay " + rs(p.price + ship) + " for the " + p.name + " on Razorpay, then enter your delivery address. We dispatch within 24 hours."; }
+  const btnId = (CONFIG.razorpayButtons || {})[p.id];
+  if (btnId) { pay.removeAttribute("target"); pay.href = "#shop"; pay.onclick = e => { e.preventDefault(); track("InitiateCheckout", p); openRzpButton(btnId, link); }; note.removeAttribute("data-warn"); note.textContent = "You'll pay " + rs(p.price + ship) + " for the " + p.name + " on Razorpay, then enter your delivery address. We dispatch within 24 hours."; }
+  else if (link) { pay.href = link; pay.target = "_blank"; pay.rel = "noopener"; pay.onclick = () => track("InitiateCheckout", p); note.removeAttribute("data-warn"); note.textContent = "You'll pay " + rs(p.price + ship) + " for the " + p.name + " on Razorpay, then enter your delivery address. We dispatch within 24 hours."; }
   else { pay.removeAttribute("target"); pay.href = "#shop"; pay.onclick = e => { e.preventDefault(); note.dataset.warn = ""; note.textContent = "Online ordering opens on launch day, Sunday 1 Nov."; }; }
   document.getElementById("mbar-name").textContent = p.name;
   document.getElementById("mbar-amt").textContent = rs(p.price + ship);
@@ -1467,8 +1522,8 @@ if (!CONFIG.whatsappNumber) document.querySelectorAll(".btn.js-wa").forEach(el =
 (function () {
   const now = new Date(), d = (s) => new Date(s + "T00:00:00+05:30");
   const bar = document.getElementById("announce");
-  if (now < d("2026-11-01")) bar.innerHTML = 'Launching <strong>Sunday 1 Nov</strong> · The <strong>Diwali gift box</strong> is here';
-  else if (now < d("2026-11-09")) bar.innerHTML = '<strong>Diwali gift box ₹649</strong> · Ships across India in 24 hours';
+  if (now < d("2026-11-01")) bar.innerHTML = 'Launching <strong>Sunday 1 Nov</strong> · The <strong>festival gift box</strong> is here';
+  else if (now < d("2026-11-09")) bar.innerHTML = '<strong>Festival gift box ₹649</strong> · Ships across India in 24 hours';
   else bar.innerHTML = '<strong>India\'s own fire</strong> · Ships across India · 6-Pack ships free';
 })();
 
