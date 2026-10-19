@@ -991,7 +991,6 @@ html.pm-open { overflow: hidden; }
 .pm-mount button:active, .pm-mount .PaymentButton:active { transform: scale(.98); }
 .pm-mount button *, .pm-mount .PaymentButton * { color: #fff !important; background: transparent !important; font-family: inherit !important; }
 .pm-mount .PaymentButton-securedBy, .pm-mount [class*="secured" i] { font-size: 11px !important; opacity: .8; }
-.pm-mount svg path, .pm-mount svg rect { fill: #fff !important; }
 .pm-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin-top: 16px; font-size: 13px; color: #CFC9BA; }
 .pm-trust span { display: inline-flex; align-items: center; gap: 6px; }
 .pm-trust svg { width: 16px; height: 16px; fill: none; stroke: #7BC67E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -999,6 +998,13 @@ html.pm-open { overflow: hidden; }
 .pm-methods b { font-weight: 600; font-size: 11px; letter-spacing: .5px; color: #A8A39A; border: 1px solid #2E2E2E; border-radius: 4px; padding: 3px 7px; }
 .pm-mount button, .pm-mount .PaymentButton { display: flex !important; align-items: center !important; justify-content: center !important; gap: 10px !important; padding: 8px 24px !important; }
 .pm-mount .PaymentButton-contents { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+
+/* checkout button: hide Razorpay's icon (it can't be recoloured cleanly), keep a clean centred label */
+.pm-mount button svg, .pm-mount button img, .pm-mount .PaymentButton svg, .pm-mount .PaymentButton img, .pm-mount [class*="logo" i], .pm-mount [class*="icon" i] { display: none !important; }
+.pm-mount button, .pm-mount .PaymentButton { flex-direction: column !important; gap: 2px !important; padding: 8px 24px !important; text-align: center !important; white-space: nowrap; overflow: hidden; }
+.pm-mount .PaymentButton-contents { align-items: center !important; text-align: center !important; gap: 2px !important; }
+.pm-mount .PaymentButton-text { font-size: 18px !important; font-weight: 700 !important; line-height: 1.1 !important; }
+.pm-mount .PaymentButton-securedBy { font-size: 11px !important; font-weight: 500 !important; line-height: 1.2 !important; opacity: .85; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
