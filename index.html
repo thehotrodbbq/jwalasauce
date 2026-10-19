@@ -1005,6 +1005,40 @@ html.pm-open { overflow: hidden; }
 .pm-mount .PaymentButton-contents { align-items: center !important; text-align: center !important; gap: 2px !important; }
 .pm-mount .PaymentButton-text { font-size: 18px !important; font-weight: 700 !important; line-height: 1.1 !important; }
 .pm-mount .PaymentButton-securedBy { font-size: 11px !important; font-weight: 500 !important; line-height: 1.2 !important; opacity: .85; }
+
+/* tasting notes */
+.taste { background: #0E0E0E; position: relative; }
+.taste .tn-lede { max-width: 640px; color: #CFC9BA; font-size: 19px; margin: 18px 0 0; }
+.taste .tn-grid2 { display: grid; grid-template-columns: minmax(0,1.25fr) minmax(0,1fr); gap: 40px; align-items: center; margin-top: 36px; }
+.taste .tn-chart-wrap { background: #121212; border: 1px solid #222; border-radius: 4px; padding: 18px 14px 8px; }
+.taste .tn-chart { width: 100%; height: auto; display: block; overflow: visible; }
+.taste .tn-line { stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 6px rgba(238,90,36,.55)); }
+.taste .tn-area { opacity: 0; }
+.taste .tn-dot { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.taste.in .tn-line { animation: tn-draw 2.2s ease-out forwards; }
+.taste.in .tn-area { animation: tn-fade 1s ease-out 1.2s forwards; }
+.taste.in .tn-dot { animation: tn-pop .45s cubic-bezier(.3,1.6,.5,1) forwards; }
+.taste.in .tn-pos:nth-child(1) .tn-dot { animation-delay: .5s; } .taste.in .tn-pos:nth-child(2) .tn-dot { animation-delay: 1s; } .taste.in .tn-pos:nth-child(3) .tn-dot { animation-delay: 1.5s; } .taste.in .tn-pos:nth-child(4) .tn-dot { animation-delay: 2s; }
+@keyframes tn-draw { to { stroke-dashoffset: 0; } }
+@keyframes tn-fade { to { opacity: 1; } }
+@keyframes tn-pop { from { opacity: 0; transform: scale(.3); } to { opacity: 1; transform: scale(1); } }
+.taste .tn-stops { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; counter-reset: none; }
+.taste .tn-stops li { border-left: 2px solid #2A2A2A; padding: 2px 0 2px 18px; transition: border-color .3s; }
+.taste .tn-stops li:hover { border-left-color: #EE5A24; }
+.taste .tn-stamp { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #EE5A24; font-weight: 600; }
+.taste .tn-stops h3 { margin: 4px 0 4px; font-size: 22px; }
+.taste .tn-stops p { margin: 0; color: #A8A39A; font-size: 16px; line-height: 1.5; }
+.taste .tn-glance { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 0; margin: 44px 0 0; border-top: 1px solid #2A2A2A; border-bottom: 1px solid #2A2A2A; }
+.taste .tn-glance div { padding: 16px 12px; border-left: 1px solid #2A2A2A; }
+.taste .tn-glance div:first-child { border-left: 0; padding-left: 0; }
+.taste .tn-glance dt { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8A857C; }
+.taste .tn-glance dd { margin: 4px 0 0; font-weight: 700; font-size: 16px; color: #F5F2EA; }
+@media (max-width: 900px) { .taste .tn-grid2 { grid-template-columns: 1fr; gap: 28px; } .taste .tn-glance { grid-template-columns: repeat(3, minmax(0,1fr)); } .taste .tn-glance div:nth-child(4) { border-left: 0; padding-left: 0; } .taste .tn-glance div:nth-child(n+4) { border-top: 1px solid #2A2A2A; } }
+@media (max-width: 700px) { .taste .tn-lede { font-size: 17px; } .taste .tn-stops h3 { font-size: 20px; } .taste .tn-glance { grid-template-columns: repeat(2, minmax(0,1fr)); } .taste .tn-glance div { border-left: 0 !important; padding-left: 0 !important; } .taste .tn-glance div:nth-child(n+3) { border-top: 1px solid #2A2A2A; } .taste .tn-glance div:nth-child(even) { padding-left: 14px !important; border-left: 1px solid #2A2A2A !important; } }
+@media (prefers-reduced-motion: reduce) { .taste .tn-line { stroke-dashoffset: 0; } .taste .tn-area, .taste .tn-dot { opacity: 1; } .taste.in * { animation: none !important; } }
+
+@media (max-width: 700px) { .taste .tn-ax { font-size: 22px; } .taste .tn-chart-wrap { padding: 12px 6px 4px; } }
+html[lang="hi"] .taste .tn-glance dt, html[lang="hi"] .taste .tn-stamp { letter-spacing: 0; text-transform: none; font-size: 13px; }
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1192,7 +1226,27 @@ html.pm-open { overflow: hidden; }
     </div>
   </section>
 
-    <section class="block age" aria-labelledby="age-h">
+    <section class="block taste" id="taste" aria-labelledby="taste-h">
+    <div class="wrap">
+      <span class="kicker">Tasting notes</span>
+      <h2 id="taste-h" style="margin-top:16px">What fire <span class="r">tastes like.</span></h2>
+      <p class="tn-lede">Not just heat. JWALA opens bright and tangy, brings the fresh flavour of the chilli, builds a warm heat, then steps back so you still taste your food.</p>
+      <div class="tn-grid2">
+        <div class="tn-chart-wrap"><svg class="tn-chart" viewBox="0 0 600 260" role="img" aria-label="Chart: the JWALA taste journey, from bright tang to fresh chilli, a building heat and a deep, clean finish">
+          <defs><linearGradient id="tn-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EE5A24" stop-opacity=".45"/><stop offset="1" stop-color="#EE5A24" stop-opacity="0"/></linearGradient></defs>
+          <g class="tn-grid" stroke="#2A2A2A" stroke-width="1"><path d="M40 220 H580"/><path d="M40 160 H580" stroke-dasharray="3 6"/><path d="M40 100 H580" stroke-dasharray="3 6"/><path d="M40 40 H580" stroke-dasharray="3 6"/></g>
+          <path class="tn-area" d="M40 205 C 70 120, 105 92, 140 104 S 215 150, 270 128 S 380 52, 440 46 S 540 120, 580 168 L580 220 L40 220 Z" fill="url(#tn-fill)"/>
+          <path class="tn-line" d="M40 205 C 70 120, 105 92, 140 104 S 215 150, 270 128 S 380 52, 440 46 S 540 120, 580 168" fill="none" stroke="#EE5A24" stroke-width="4" stroke-linecap="round" pathLength="1"/>
+          <g class="tn-dots"><g class="tn-pos" data-t="0.17"><g class="tn-dot"><circle r="15" fill="#0E0E0E" stroke="#EE5A24" stroke-width="3"/><text text-anchor="middle" dy="5" font-size="14" font-weight="700" fill="#F5F2EA">1</text></g></g><g class="tn-pos" data-t="0.45"><g class="tn-dot"><circle r="15" fill="#0E0E0E" stroke="#EE5A24" stroke-width="3"/><text text-anchor="middle" dy="5" font-size="14" font-weight="700" fill="#F5F2EA">2</text></g></g><g class="tn-pos" data-t="0.72"><g class="tn-dot"><circle r="15" fill="#0E0E0E" stroke="#EE5A24" stroke-width="3"/><text text-anchor="middle" dy="5" font-size="14" font-weight="700" fill="#F5F2EA">3</text></g></g><g class="tn-pos" data-t="0.93"><g class="tn-dot"><circle r="15" fill="#0E0E0E" stroke="#EE5A24" stroke-width="3"/><text text-anchor="middle" dy="5" font-size="14" font-weight="700" fill="#F5F2EA">4</text></g></g></g>
+          <g class="tn-ax" fill="#A8A39A" font-size="13"><text x="40" y="246">First taste</text><text x="310" y="246" text-anchor="middle">10 sec</text><text x="580" y="246" text-anchor="end">30 sec</text><text x="14" y="130" transform="rotate(-90 14 130)" text-anchor="middle">Intensity</text></g>
+        </svg></div>
+        <ol class="tn-stops"><li><span class="tn-stamp">01 · First</span><h3>Bright &amp; tangy</h3><p>The fermented tang hits first. Sharp, clean, mouth-watering.</p></li><li><span class="tn-stamp">02 · Then</span><h3>Fresh chilli</h3><p>The flavour of the jwala chilli itself. Green-to-red and properly desi.</p></li><li><span class="tn-stamp">03 · Builds</span><h3>Warm heat</h3><p>A heat that rises slowly, about 3 on 5. Hot, not a dare.</p></li><li><span class="tn-stamp">04 · Finish</span><h3>Deep &amp; clean</h3><p>The fermented depth lingers, the heat fades, and your food still tastes like your food.</p></li></ol>
+      </div>
+      <dl class="tn-glance"><div><dt>Chilli</dt><dd>Jwala</dd></div><div><dt>Method</dt><dd>Slow-fermented</dd></div><div><dt>Heat</dt><dd>3 / 5</dd></div><div><dt>Made in</dt><dd>Small batches</dd></div><div><dt>Diet</dt><dd>100% vegetarian</dd></div><div><dt>Storage</dt><dd>No fridge needed</dd></div></dl>
+    </div>
+  </section>
+
+  <section class="block age" aria-labelledby="age-h">
     <div class="wrap">
       <span class="kicker">Ages like achaar</span>
       <h2 id="age-h">Gets better <span class="r">with time.</span></h2>
@@ -1781,6 +1835,13 @@ renderPacks(); renderSummary();
 (function(){ if(!('IntersectionObserver' in window)) return;
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ e.target.classList.toggle('jw-off', !e.isIntersecting); }); }, {rootMargin:'150px 0px'});
   document.querySelectorAll('main > section, section.spot, .marquee, .hero').forEach(function(s){ io.observe(s); });
+})();
+</script><script>
+(function(){ var s=document.getElementById('taste'); if(!s) return;
+  var line=s.querySelector('.tn-line');
+  s.querySelectorAll('.tn-pos').forEach(function(g){ var L=line.getTotalLength(), p=line.getPointAtLength(L*parseFloat(g.dataset.t)); g.setAttribute('transform','translate('+p.x.toFixed(1)+' '+p.y.toFixed(1)+')'); });
+  if(!('IntersectionObserver' in window)){ s.classList.add('in'); return; }
+  var io=new IntersectionObserver(function(e){ if(e[0].isIntersecting){ s.classList.add('in'); io.disconnect(); } },{threshold:.3}); io.observe(s);
 })();
 </script>
 </body></html>
