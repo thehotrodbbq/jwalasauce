@@ -970,6 +970,29 @@ html[lang="hi"] .age-steps b { font-style: normal; font-stretch: normal; text-tr
 @keyframes jw-pop { from { transform: scale(.9) translateY(6px); opacity: .3; } to { transform: none; opacity: 1; } }
 @media (max-width: 760px) { .checkout { grid-template-columns: auto minmax(0,1fr); } .checkout .pay { grid-column: 1 / -1; } .sum-art { width: 92px; height: 92px; } }
 @media (prefers-reduced-motion: reduce) { .sum-art svg { animation: none; } }
+
+/* checkout modal (Razorpay Payment Button) */
+html.pm-open { overflow: hidden; }
+.pm-back { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.72); display: grid; place-items: center; padding: 16px; animation: pm-fade .2s ease-out; }
+.pm-card { position: relative; width: min(420px, 100%); background: #111; color: #F5F2EA; border: 1px solid #2A2A2A; border-radius: 6px; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,.6); animation: pm-up .25s ease-out; }
+.pm-card::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: var(--ripe, #EE5A24); border-radius: 6px 6px 0 0; }
+.pm-x { position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; border: 0; background: transparent; color: #A8A39A; font-size: 28px; line-height: 1; cursor: pointer; border-radius: 50%; }
+.pm-x:hover, .pm-x:focus-visible { color: #F5F2EA; background: #1E1E1E; }
+.pm-head { display: flex; gap: 16px; align-items: center; padding-right: 36px; }
+.pm-art { width: 84px; height: 84px; flex: none; border-radius: 4px; background: radial-gradient(circle at 50% 60%, #241A14 0, #0E0E0E 70%); }
+.pm-art svg { width: 100%; height: 100%; display: block; }
+.pm-k { margin: 0; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #A8A39A; }
+.pm-name { margin: 2px 0 0; font-weight: 700; font-size: 18px; }
+.pm-total { margin: 0; font-family: var(--f-sign, inherit); font-size: 26px; color: #EE5A24; }
+.pm-sub { margin: 18px 0 14px; color: #A8A39A; font-size: 15px; }
+.pm-mount { min-height: 52px; display: grid; place-items: center; }
+.pm-mount form { display: flex; justify-content: center; }
+.pm-load { margin: 0; color: #A8A39A; font-size: 14px; }
+.pm-alt { display: block; margin-top: 16px; text-align: center; font-size: 14px; color: #A8A39A; }
+@keyframes pm-fade { from { opacity: 0; } }
+@keyframes pm-up { from { transform: translateY(16px); opacity: 0; } }
+@media (max-width: 700px) { .pm-back { place-items: end center; padding: 0; } .pm-card { width: 100%; border-radius: 12px 12px 0 0; padding: 22px 18px calc(22px + env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { .pm-back, .pm-card { animation: none; } }
 </style>
 </head>
 <body>
@@ -1472,21 +1495,36 @@ function packArt(id) {
   return `<svg viewBox="0 0 200 200" aria-hidden="true">${g}</svg>`;
 }
 
-function openRzpButton(id, fallback) {
-  let host = document.getElementById("rzp-host");
-  if (!host) { host = document.createElement("div"); host.id = "rzp-host"; host.setAttribute("aria-hidden", "true");
-    host.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);left:-9999px"; document.body.appendChild(host); }
-  if (host.dataset.id !== id) {
-    host.innerHTML = ""; const f = document.createElement("form"); const s = document.createElement("script");
-    s.src = "https://checkout.razorpay.com/v1/payment-button.js"; s.async = true; s.setAttribute("data-payment_button_id", id);
-    f.appendChild(s); host.appendChild(f); host.dataset.id = id;
-  }
+function payModal(p, btnId, link, total) {
+  const hi = document.documentElement.lang === "hi";
+  const T = hi ? { title: "सुरक्षित चेकआउट", sub: "UPI, कार्ड या नेटबैंकिंग से Razorpay पर भुगतान करें।", load: "Razorpay लोड हो रहा है…", fail: "यहाँ Razorpay लोड नहीं हो सका।", alt: "Razorpay पेज पर भुगतान करें →", close: "बंद करें" }
+                 : { title: "Secure checkout", sub: "Pay by UPI, card or netbanking on Razorpay.", load: "Loading Razorpay…", fail: "Razorpay couldn't load here.", alt: "Pay on Razorpay's page instead →", close: "Close" };
+  let m = document.getElementById("pay-modal");
+  if (m) m.remove();
+  m = document.createElement("div"); m.id = "pay-modal"; m.className = "pm-back"; m.setAttribute("role", "dialog"); m.setAttribute("aria-modal", "true"); m.setAttribute("aria-labelledby", "pm-title");
+  m.innerHTML = `<div class="pm-card"><button class="pm-x" type="button" aria-label="${T.close}">&times;</button>
+    <div class="pm-head"><div class="pm-art">${packArt(p.id)}</div><div><p class="pm-k" id="pm-title">${T.title}</p><p class="pm-name">${p.name}</p><p class="pm-total">${rs(total)}</p></div></div>
+    <p class="pm-sub">${T.sub}</p><div class="pm-mount"><p class="pm-load">${T.load}</p></div>
+    ${link ? `<a class="pm-alt" href="${link}" target="_blank" rel="noopener">${T.alt}</a>` : ""}</div>`;
+  document.body.appendChild(m); document.documentElement.classList.add("pm-open");
+  const close = () => { m.remove(); document.documentElement.classList.remove("pm-open"); document.removeEventListener("keydown", esc); last && last.focus && last.focus(); };
+  const esc = e => { if (e.key === "Escape") close(); };
+  const last = document.activeElement;
+  m.addEventListener("click", e => { if (e.target === m) close(); });
+  m.querySelector(".pm-x").addEventListener("click", close);
+  document.addEventListener("keydown", esc);
+  m.querySelector(".pm-x").focus();
+  const mount = m.querySelector(".pm-mount");
+  const f = document.createElement("form"); f.addEventListener("submit", e => e.preventDefault());
+  const s = document.createElement("script"); s.src = "https://checkout.razorpay.com/v1/payment-button.js"; s.async = true; s.setAttribute("data-payment_button_id", btnId);
+  s.onerror = () => { mount.innerHTML = `<p class="pm-load">${T.fail}</p>`; };
+  f.appendChild(s); mount.appendChild(f);
   const t0 = Date.now();
-  (function tryOpen() {
-    const b = host.querySelector(".razorpay-payment-button, button, input[type=submit]");
-    if (b) { b.click(); return; }
-    if (Date.now() - t0 > 6000) { if (fallback) location.href = fallback; return; }
-    setTimeout(tryOpen, 120);
+  (function watch() {
+    if (!document.body.contains(m)) return;
+    if (f.querySelector("button, iframe, .razorpay-payment-button")) { const l = mount.querySelector(".pm-load"); if (l) l.remove(); return; }
+    if (Date.now() - t0 > 7000) { const l = mount.querySelector(".pm-load"); if (l) l.textContent = T.fail; return; }
+    setTimeout(watch, 150);
   })();
 }
 
@@ -1503,7 +1541,7 @@ function renderSummary() {
   const note = document.getElementById("pay-note");
   const link = CONFIG.razorpayLinks[p.id];
   const btnId = (CONFIG.razorpayButtons || {})[p.id];
-  if (btnId) { pay.removeAttribute("target"); pay.href = "#shop"; pay.onclick = e => { e.preventDefault(); track("InitiateCheckout", p); openRzpButton(btnId, link); }; note.removeAttribute("data-warn"); note.textContent = "आप " + p.name + " के लिए " + rs(p.price + ship) + " Razorpay पर पे करेंगे, फिर डिलीवरी पता डालेंगे। हम 24 घंटे में भेज देते हैं।"; }
+  if (btnId) { pay.removeAttribute("target"); pay.href = "#shop"; pay.onclick = e => { e.preventDefault(); track("InitiateCheckout", p); payModal(p, btnId, link, p.price + ship); }; note.removeAttribute("data-warn"); note.textContent = "आप " + p.name + " के लिए " + rs(p.price + ship) + " Razorpay पर पे करेंगे, फिर डिलीवरी पता डालेंगे। हम 24 घंटे में भेज देते हैं।"; }
   else if (link) { pay.href = link; pay.target = "_blank"; pay.rel = "noopener"; pay.onclick = () => track("InitiateCheckout", p); note.removeAttribute("data-warn"); note.textContent = "आप " + p.name + " के लिए " + rs(p.price + ship) + " Razorpay पर पे करेंगे, फिर डिलीवरी पता डालेंगे। हम 24 घंटे में भेज देते हैं।"; }
   else { pay.removeAttribute("target"); pay.href = "#shop"; pay.onclick = e => { e.preventDefault(); note.dataset.warn = ""; note.textContent = "ऑनलाइन ऑर्डर लॉन्च के दिन, रविवार 1 नवंबर से शुरू होंगे।"; }; }
   document.getElementById("mbar-name").textContent = p.name;
